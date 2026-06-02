@@ -1,0 +1,63 @@
+{
+  "id": "e07daa0d-2050-40f2-970c-86b85542171d",
+  "name": "Project 5/27/2026, 12:16:39 AM",
+  "created_at": 1779821199.9118314,
+  "updated_at": 1779821199.9118314,
+  "data": {
+    "topic": "#### 3. Catastrophic El Ni\u00f1o Event Warning for 2026  Scientists are issuing grave warnings about a powerful El Ni\u00f1o climate event in 2026, which could be one of the strongest on record. It threatens to trigger w",
+    "videoType": "short",
+    "duration": 30,
+    "tone": "Professional",
+    "audience": "Tech enthusiasts",
+    "instructions": "",
+    "researchContext": "",
+    "outline": "",
+    "segments": [
+      {
+        "id": 1,
+        "section": "Scene 1",
+        "text": "WARNING! A catastrophic El Ni\u00f1o event is predicted for 2026!",
+        "duration": 4.3,
+        "visual_cue": "Subtitle scene showing: WARNING! A catastrophic El Ni\u00f1...",
+        "emotion_tag": "none"
+      },
+      {
+        "id": 2,
+        "section": "Scene 2",
+        "text": "Scientists say it could be one of the strongest ever, bringing widespread droughts, floods, and food turmoil.",
+        "duration": 7.3,
+        "visual_cue": "Subtitle scene showing: Scientists say it could be one...",
+        "emotion_tag": "none"
+      },
+      {
+        "id": 3,
+        "section": "Scene 3",
+        "text": "Ocean temperatures could spike by 5.4 degrees Fahrenheit. This echoes the 1877 catastrophe that claimed 50 million lives.",
+        "duration": 7.7,
+        "visual_cue": "Subtitle scene showing: Ocean temperatures could spike...",
+        "emotion_tag": "none"
+      },
+      {
+        "id": 4,
+        "section": "Scene 4",
+        "text": "With a 96% chance, this 'super' El Ni\u00f1o could push global average temperatures past critical 1.5-degree limits.",
+        "duration": 7.3,
+        "visual_cue": "Subtitle scene showing: With a 96% chance, this 'super...",
+        "emotion_tag": "none"
+      },
+      {
+        "id": 5,
+        "section": "Scene 5",
+        "text": "We're better prepared, but pressure on global systems will be immense. Stay informed. This is critical.",
+        "duration": 6.9,
+        "visual_cue": "Subtitle scene showing: We're better prepared, but pre...",
+        "emotion_tag": "none"
+      }
+    ],
+    "selectedVoice": {
+      "voice_id": "CwhRBWXzGAHq8TQ4Fs17",
+      "name": "Roger - Laid-Back, Casual, Resonant"
+    },
+    "visualScenes": []
+  }
+}

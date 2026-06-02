@@ -1,90 +1,150 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-display: "Outfit", sans-serif;
+  --font-sans: "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
   
-  /* Deep Premium Dark Palette */
-  --color-bg-dark: #080a0f;
-  --color-bg-card: #111420;
-  --color-bg-card-hover: #161b2e;
-  --color-bg-sidebar: #0b0d16;
+  /* StoryBoard Cinematic Production Workspace */
+  --color-primary: #151312;
+  --color-on-primary: #ffffff;
+  --color-ink: #110f0e;
+  --color-body: #4a453e;
+  --color-mute: #8c8376;
+  --color-hairline: #e8e2d9;
+  --color-hairline-strong: #d6ccbd;
   
-  --color-accent-purple: #8b5cf6;
-  --color-accent-blue: #3b82f6;
-  --color-accent-teal: #14b8a6;
+  /* Surface Layers */
+  --color-canvas: #faf8f5;
+  --color-canvas-soft: #f2ebe1;
+  --color-canvas-soft-2: #e8ded0;
+  --color-canvas-elevated: #ffffff;
+  --color-canvas-deep: #110f0e; /* For high-contrast dark elements */
+
+  --color-link: #0e7490;
+  --color-link-deep: #155e75;
+  --color-success: #15803d;
+  --color-success-soft: #f0fdf4;
+  --color-error: #b91c1c;
+  --color-error-soft: #fef2f2;
+  --color-warning: #b45309;
+  --color-warning-soft: #fffbeb;
+  --color-info: #0369a1;
+  --color-info-soft: #f0f9ff;
   
-  /* Transitions */
-  --animate-fade-in: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* Brand Gradients - More sophisticated */
+  --color-gradient-news-start: #0891b2;
+  --color-gradient-news-end: #0e7490;
+  --color-gradient-script-start: #7c3aed;
+  --color-gradient-script-end: #db2777;
+  --color-gradient-voice-start: #0d9488;
+  --color-gradient-voice-end: #16a34a;
+  --color-gradient-video-start: #ea580c;
+  --color-gradient-video-end: #dc2626;
+
+  /* Custom Radii */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  
+  /* Transitions & Depth */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  --animate-fade-in: fade-in 0.3s ease-out forwards;
   --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  --animate-pulse-slow: pulse-slow 3s ease-in-out infinite;
+  --animate-scale-in: scale-in 0.2s ease-out forwards;
 
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes slide-up {
-    from { transform: translateY(12px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  @keyframes pulse-slow {
-    0%, 100% { opacity: 0.8; transform: scale(1); filter: brightness(1); }
-    50% { opacity: 1; transform: scale(1.02); filter: brightness(1.2); }
-  }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slide-up { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes scale-in { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 }
 
-/* Custom Scrollbar Styles for premium layout */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Base Styles */
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar-track {
-  background: #080a0f;
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-hairline-strong); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-mute); }
+
+/* Cinematic Layout Components */
+.studio-card {
+  background-color: var(--color-canvas-elevated);
+  border: 1px solid var(--color-hairline);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+}
+.studio-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-hairline-strong);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 9999px;
+.studio-input {
+  background-color: var(--color-canvas-elevated);
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-sm);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+}
+.studio-input:focus {
+  border-color: var(--color-ink);
+  box-shadow: 0 0 0 1px var(--color-ink);
+  outline: none;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+.studio-button-primary {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-pill);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.studio-button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.1);
+}
+.studio-button-primary:active {
+  transform: translateY(0);
 }
 
-/* Glassmorphism components */
+/* Text Refinements */
+.text-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-mute);
+}
+
+/* Utility for spacing/breathability */
+.content-breathable {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2.5rem;
+}
+
 .glass-panel {
-  background: rgba(17, 20, 32, 0.7);
+  background: rgba(255, 253, 250, 0.8);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
-.glass-panel-accent {
-  background: rgba(139, 92, 246, 0.03);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-}
-
-.neon-glow-purple {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);
-}
-
-.neon-glow-teal {
-  box-shadow: 0 0 20px rgba(20, 184, 166, 0.15);
-}
-
-/* Page transitions */
-.page-enter {
-  animation: var(--animate-slide-up);
-}
-
-/* Hide native controls where needed */
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}

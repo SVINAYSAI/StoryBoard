@@ -17,6 +17,10 @@ export default defineConfig({
       '/audio': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+      },
+      '/visuals': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
       }
     }
   }
