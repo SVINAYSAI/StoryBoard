@@ -87,8 +87,9 @@ def delete_voiceover_file(filename: str):
     """Deletes the audio file and its metadata JSON from the cache."""
     # Safety check: make sure we don't delete files outside the cache directory
     import os
+    # Enhanced/isolated tracks appear in this same history listing.
     clean_filename = os.path.basename(filename)
-    if not clean_filename.startswith("voiceover_") or not (
+    if not clean_filename.startswith(("voiceover_", "enhanced_")) or not (
         clean_filename.endswith(".mp3") or clean_filename.endswith(".json")
     ):
         raise HTTPException(status_code=400, detail="Invalid file deletion request.")

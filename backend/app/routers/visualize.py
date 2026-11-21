@@ -158,7 +158,8 @@ def generate_scene_prompts(req: ScenePromptGenerateRequest):
     """Converts a user-supplied scene description into detailed master prompts for both image and video generation."""
     token = get_gcp_access_token()
 
-    image_template = "[Style/Medium] of [Subject] performing [Action] in [Environment], [Lighting/Mood], [Composition/Camera Angle], [Color Palette] --ar 16:9"
+    ar_suffix = f"--ar {req.aspect_ratio}"
+    image_template = f"[Style/Medium] of [Subject] performing [Action] in [Environment], [Lighting/Mood], [Composition/Camera Angle], [Color Palette] {ar_suffix}"
     video_template = "[Camera Movement]: [Subject + Action] in [Environment], [Pacing/Speed], [Style/Aesthetic], [Lighting/Atmosphere]"
 
     prompt = (
@@ -175,7 +176,7 @@ def generate_scene_prompts(req: ScenePromptGenerateRequest):
         "1. For the Image Prompt (`master_prompt_image`), you MUST follow this exact format strictly:\n"
         f"   `{image_template}`\n"
         "   - Expand the description to be cinematic, descriptive, and specify the exact medium (e.g. 'Cinematic photograph', 'Photorealistic digital art'), camera lens, details, mood, lighting, and color palette.\n"
-        "   - Ensure the prompt ends with '--ar 16:9'. Do not write generic sentences; make it a descriptive tag-based or descriptive sentence-based prompt.\n\n"
+        f"   - Ensure the prompt ends with '{ar_suffix}'. Do not write generic sentences; make it a descriptive tag-based or descriptive sentence-based prompt.\n\n"
 
         "2. For the Video Prompt (`master_prompt_video`), you MUST follow this exact format strictly:\n"
         f"   `{video_template}`\n"
@@ -234,7 +235,7 @@ def generate_visual_image(req: ImageGenerateRequest):
             token,
             req.model,
             instances=[{"prompt": req.prompt}],
-            parameters={"sampleCount": 1, "aspectRatio": "16:9"},
+            parameters={"sampleCount": 1, "aspectRatio": req.aspect_ratio},
         )
 
         predictions = res_data.get("predictions", [])

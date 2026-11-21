@@ -72,6 +72,12 @@ graph TD
     *   Highlights the character cost of the active script layout.
     *   Warns users when character requirements exceed their current ElevenLabs balance.
 
+6.  **YouTube Video Import**
+    *   Inspects a video from your own channel or another authorized source and lists available resolutions.
+    *   Downloads video at the best available quality or a selected maximum resolution, or extracts audio as high-quality MP3.
+    *   Optionally downloads a clip by start and end timestamps instead of the full video.
+    *   Requires confirmation that you own or have permission to download the video.
+
 ---
 
 ## 🛠️ Technology Stack
@@ -82,6 +88,7 @@ graph TD
 *   **Google Auth** (`2.28.2`): GCP Service Account credentials manager.
 *   **Requests** (`2.31.0`): HTTP requests client.
 *   **Python Dotenv** (`1.0.1`): Environment variable loader.
+*   **yt-dlp**: YouTube video information and download support.
 
 ### Frontend
 *   **React** (`^19.0.0`): Declarative UI library.
@@ -127,6 +134,7 @@ storyboard/
 ### Prerequisites
 *   **Python 3.10+**
 *   **Node.js 18+**
+*   **FFmpeg** available on `PATH` (required to combine streams and trim timestamped clips).
 *   **Google Cloud Platform** service account with access enabled for the `Generative Language API` (`https://www.googleapis.com/auth/generative-language` scope).
 *   **ElevenLabs** account and active API Key.
 
@@ -165,13 +173,18 @@ storyboard/
 
 5.  Launch the FastAPI server:
     ```bash
-    uvicorn main:app --reload --port 8000
+    uvicorn app.main:app --reload --port 8001
     ```
-    The API documentation will be available at `http://localhost:8000/docs`.
+    The API documentation will be available at `http://localhost:8001/docs`.
+
+    *Note: port `8001` is deliberate — the Vite dev proxy (`frontend/vite.config.js`) forwards
+    `/api`, `/audio`, and `/visuals` here. If you change it, change both places.*
+
+    *Note: install FFmpeg separately and ensure `ffmpeg` is available on `PATH` before using YouTube Import.*
 
 ---
 
-### 2. Frontend Setup
+### 2. Frontend Setup   
 
 1.  Navigate to the `frontend` directory:
     ```bash
@@ -187,7 +200,7 @@ storyboard/
     ```bash
     npm run dev
     ```
-    Open `http://localhost:5173` in your browser. The Vite server is pre-configured to proxy `/api` and `/audio` routes to the backend on `localhost:8000`.
+    Open the URL Vite prints (`http://localhost:5173`, or the next free port if 5173 is taken). The Vite server is pre-configured to proxy `/api`, `/audio`, and `/visuals` routes to the backend on `localhost:8001`.
 
 ---
 
@@ -205,6 +218,14 @@ The backend exposes the following API routes under the `/api` prefix:
 *   **`POST /api/research`**
     *   **Payload**: `{ "query": "search query" }`
     *   **Action**: Prompts Gemini 2.5 Flash using real-time search grounding tools to deliver a factual summary, query keywords, and cited website links.
+
+### ▶️ YouTube Video Import
+*   **`POST /api/youtube/info`**
+    *   **Payload**: `{ "url": "https://www.youtube.com/watch?v=...", "has_permission": true }`
+    *   **Action**: Returns the video title, duration, thumbnail, and available resolutions. The permission confirmation is required.
+*   **`POST /api/youtube/download`**
+    *   **Payload**: `{ "url": "https://www.youtube.com/watch?v=...", "has_permission": true, "media_type": "audio", "quality": "best", "start_seconds": 30, "end_seconds": 90 }`
+    *   **Action**: Returns a video or high-quality MP3 audio download, optionally trimmed to the requested timestamps. `media_type` may be `video` or `audio`. Video `quality` may be `best`, `2160`, `1440`, `1080`, `720`, `480`, or `360`; omit both timestamp fields to download the full media.
 
 ### 📝 Storyboard Scripting
 *   **`POST /api/generate-script`**

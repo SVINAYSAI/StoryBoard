@@ -3,8 +3,9 @@ import {
   Play, Square, Pause, Download, Trash2, Sliders, Volume2, Cpu,
   AlertCircle, RefreshCw, FileDown, Info, Edit, Check, X,
   Zap, Wind, Smile, CloudRain, Flame, Activity, Frown, Sun, 
-  VolumeX, Ghost, Meh, Minus, ChevronRight
+  VolumeX, Ghost, Meh, Minus, ChevronRight, Wand2
 } from 'lucide-react';
+import { api } from '../../api';
 import { EMOTION_TAGS } from '../../constants';
 
 const EMOTION_ICONS = {
@@ -55,6 +56,43 @@ export default function VoiceOverCreator({
 
   // Continuous Full Script State
   const [generatingFullScript, setGeneratingFullScript] = useState(false);
+
+  // Manual Audio Generator State
+  const [manualText, setManualText] = useState('');
+  const [manualEmotionTag, setManualEmotionTag] = useState('none');
+  const [manualGenerating, setManualGenerating] = useState(false);
+
+  // Audio Isolation / Cleanup state
+  const [isolatingAudioId, setIsolatingAudioId] = useState(null);
+
+  const handleIsolateAudio = async (sourceAudio, segmentId = null) => {
+    const trackingId = segmentId || sourceAudio.filename;
+    setIsolatingAudioId(trackingId);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('cached_filename', sourceAudio.filename);
+      if (segmentId) formData.append('segment_id', segmentId);
+      if (projectId) formData.append('project_id', projectId);
+      // Carry the source track's identity so the cleaned version stays
+      // attached to its segment and renders properly in the Studio Cache.
+      if (sourceAudio.text) formData.append('text', sourceAudio.text);
+      if (sourceAudio.voice_id) formData.append('voice_id', sourceAudio.voice_id);
+      if (sourceAudio.voice_name) formData.append('voice_name', sourceAudio.voice_name);
+
+      const enhanced = await api.audioEnhancer.isolate(formData);
+      if (onUpdateHistoryWithNewAudio) {
+        onUpdateHistoryWithNewAudio(enhanced);
+      }
+      if (fetchHistory) {
+        await fetchHistory();
+      }
+    } catch (err) {
+      setError(err.message || 'Audio isolation failed.');
+    } finally {
+      setIsolatingAudioId(null);
+    }
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -210,6 +248,59 @@ export default function VoiceOverCreator({
       setError(err.message || 'Error generating full script.');
     } finally {
       setGeneratingFullScript(false);
+    }
+  };
+
+  const handleGenerateManualVoiceover = async () => {
+    if (!selectedVoice) {
+      setError('Please select a narrator first.');
+      return;
+    }
+
+    if (!manualText.trim()) {
+      setError('Please enter some text to generate audio.');
+      return;
+    }
+
+    setManualGenerating(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/voiceover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: manualText.trim(),
+          voice_id: selectedVoice.voice_id,
+          voice_name: selectedVoice.name,
+          stability,
+          similarity_boost: similarityBoost,
+          model_id: modelId,
+          style,
+          use_speaker_boost: useSpeakerBoost,
+          speed,
+          emotion_tag: manualEmotionTag,
+          previous_text: "",
+          next_text: "",
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.detail || 'Manual voice generation failed.');
+      }
+
+      const audioMeta = await response.json();
+      if (onUpdateHistoryWithNewAudio) {
+        onUpdateHistoryWithNewAudio(audioMeta);
+      }
+      fetchHistory();
+      if (onRefreshCredits) onRefreshCredits();
+      setManualText(''); // Reset text on success
+    } catch (err) {
+      setError(err.message || 'Error generating manual voiceover.');
+    } finally {
+      setManualGenerating(false);
     }
   };
 
@@ -543,6 +634,91 @@ export default function VoiceOverCreator({
 
         {/* Script Compilation Workspace */}
         <div className="xl:col-span-3 space-y-6">
+          {/* Manual Audio Generator */}
+          <div className="studio-card p-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-hairline pb-4">
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-ink flex items-center gap-2">
+                  <Volume2 className="w-4 h-4 text-link" />
+                  Manual Audio Generator
+                </h4>
+                <p className="text-xs text-body">
+                  Synthesize any custom text manually using the current voice settings.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4 items-start">
+              <div className="flex-1 w-full relative">
+                <textarea
+                  value={manualText}
+                  onChange={(e) => setManualText(e.target.value)}
+                  placeholder="Enter text to generate speech..."
+                  className="w-full studio-input text-sm leading-relaxed min-h-[90px] resize-none"
+                />
+                {manualText && (
+                  <button
+                    onClick={() => setManualText('')}
+                    className="absolute right-3 top-3 text-mute hover:text-ink p-1 rounded-full hover:bg-canvas-soft-2 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="w-full md:w-60 space-y-4 shrink-0">
+                <div className="space-y-2">
+                  <label className="text-label block">Emotion Tag</label>
+                  <div className="relative group/emotion">
+                    <select
+                      value={manualEmotionTag}
+                      onChange={(e) => setManualEmotionTag(e.target.value)}
+                      className="w-full text-xs font-bold uppercase bg-canvas border border-hairline rounded-lg pl-8 pr-4 py-2.5 appearance-none cursor-pointer focus:border-ink focus:outline-none"
+                    >
+                      {EMOTION_TAGS.map(t => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                    <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-mute group-hover/emotion:text-violet transition-colors">
+                      {(() => {
+                        const tag = EMOTION_TAGS.find(t => t.value === manualEmotionTag);
+                        const Icon = EMOTION_ICONS[tag?.icon] || Minus;
+                        return <Icon className="w-3.5 h-3.5" />;
+                      })()}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleGenerateManualVoiceover}
+                  disabled={manualGenerating || !selectedVoice || !manualText.trim()}
+                  className="w-full studio-button-primary disabled:opacity-40"
+                >
+                  {manualGenerating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Generating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Cpu className="w-4 h-4" />
+                      <span>Generate Audio</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            {selectedVoice && (
+              <div className="text-[10px] text-mute flex items-center gap-1.5 font-mono pt-1">
+                <span>Narrator: <strong>{selectedVoice.name}</strong></span>
+                <span>•</span>
+                <span>Model: {modelId}</span>
+                <span>•</span>
+                <span>Chars: {manualText.length}</span>
+              </div>
+            )}
+          </div>
+
           {activeScript && activeScript.segments && activeScript.segments.length > 0 ? (
             <div className="space-y-6">
               {/* Full Script Master Area */}
@@ -684,6 +860,15 @@ export default function VoiceOverCreator({
                                   {isAudioPlaying(audioMeta.url) ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                                   <span>{isAudioPlaying(audioMeta.url) ? 'Pause' : 'Listen'}</span>
                                 </button>
+                                <button
+                                  onClick={() => handleIsolateAudio(audioMeta, seg.id)}
+                                  disabled={isolatingAudioId === seg.id}
+                                  title="Isolate vocals & remove background noise with ElevenLabs"
+                                  className="p-2.5 rounded-xl border border-hairline hover:bg-violet-500/10 hover:border-violet-500/30 text-violet-400 hover:text-violet-300 transition-all flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Wand2 className={`w-4 h-4 ${isolatingAudioId === seg.id ? 'animate-spin text-violet-400' : ''}`} />
+                                  <span className="text-[10px] font-bold hidden xl:inline">Clean Audio</span>
+                                </button>
                                 <button onClick={() => handleGenerateVoiceover(seg)} disabled={isGenerating} className="p-2.5 rounded-xl border border-hairline hover:bg-canvas-soft transition-all">
                                   <RefreshCw className={`w-4 h-4 text-mute ${isGenerating ? 'animate-spin text-primary' : ''}`} />
                                 </button>
@@ -749,6 +934,14 @@ export default function VoiceOverCreator({
                 <div className="flex items-center gap-1.5">
                   <button onClick={() => handlePlayAudio(item.url)} className={`p-2 rounded-lg transition-all ${isAudioPlaying(item.url) ? 'bg-error text-white shadow-md' : 'bg-canvas-soft text-body hover:text-ink shadow-inner'}`}>
                     {isAudioPlaying(item.url) ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  </button>
+                  <button
+                    onClick={() => handleIsolateAudio(item)}
+                    disabled={isolatingAudioId === item.filename}
+                    title="Isolate vocals & remove noise with ElevenLabs"
+                    className="p-2 rounded-lg bg-canvas-soft text-body hover:text-violet-400 shadow-inner transition-all cursor-pointer"
+                  >
+                    <Wand2 className={`w-3.5 h-3.5 ${isolatingAudioId === item.filename ? 'animate-spin text-violet-400' : ''}`} />
                   </button>
                   <a href={item.url} download={item.filename} className="p-2 rounded-lg bg-canvas-soft text-body hover:text-ink shadow-inner transition-all">
                     <Download className="w-3.5 h-3.5" />

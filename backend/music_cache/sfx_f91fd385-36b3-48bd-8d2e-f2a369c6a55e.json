@@ -1,0 +1,12 @@
+{
+  "id": "f91fd385-36b3-48bd-8d2e-f2a369c6a55e",
+  "type": "sfx",
+  "text": "single mouse click like a transation effect sound effect",
+  "model_id": "eleven_text_to_sound_v3",
+  "loop": false,
+  "duration_seconds": null,
+  "prompt_influence": 0.3,
+  "timestamp": 1794999633.7344484,
+  "filename": "sfx_f91fd385-36b3-48bd-8d2e-f2a369c6a55e.mp3",
+  "file_size": 8820
+}

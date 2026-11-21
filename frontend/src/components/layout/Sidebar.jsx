@@ -7,18 +7,22 @@ import React from 'react';
 import {
   Search, FileText, User, Volume2, Sparkles, 
   ChevronLeft, ChevronRight, Save, FolderOpen, 
-  Trash2, ChevronUp, ChevronDown, Cpu
+  Trash2, ChevronUp, ChevronDown, Cpu, Film, Wand2, Music2, Youtube
 } from 'lucide-react';
 import CreditStatus from './CreditStatus';
 
-const ICON_MAP = { Search, FileText, User, Volume2, Sparkles };
+const ICON_MAP = { Search, FileText, User, Volume2, Sparkles, Film, Wand2, Music2, Youtube };
 
 const MENU_ITEMS = [
   { id: 'research', name: 'AI Research', icon: 'Search', desc: 'Google search grounding' },
   { id: 'planner', name: 'Script Planner', icon: 'FileText', desc: 'Storyboard outline builder' },
   { id: 'library', name: 'Voice Library', icon: 'User', desc: 'Audition ElevenLabs actors' },
   { id: 'studio', name: 'Voiceover Studio', icon: 'Volume2', desc: 'Generate & play audios' },
+  { id: 'audio-enhancer', name: 'Audio Lab', icon: 'Wand2', desc: 'Voice isolation & cleanup' },
+  { id: 'music', name: 'Music Studio', icon: 'Music2', desc: 'AI music & sound effects' },
+  { id: 'youtube', name: 'YouTube Import', icon: 'Youtube', desc: 'Import your own videos' },
   { id: 'visuals', name: 'Storyboard Visuals', icon: 'Sparkles', desc: 'Generate images & videos' },
+  { id: 'editor', name: 'Video Editor', icon: 'Film', desc: 'Timeline & Final Render' },
 ];
 
 export default function Sidebar({

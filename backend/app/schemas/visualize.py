@@ -13,6 +13,7 @@ class SceneBreakdownRequest(BaseModel):
 class ImageGenerateRequest(BaseModel):
     prompt: str
     model: str
+    aspect_ratio: str
 
 
 class VideoSubmitRequest(BaseModel):
@@ -37,6 +38,7 @@ class VideoDownloadRequest(BaseModel):
 
 class ScenePromptGenerateRequest(BaseModel):
     scene_text: str
+    aspect_ratio: Optional[str] = "16:9"
     shot_type: Optional[str] = ""
     mood: Optional[str] = ""
     narration_coverage: Optional[str] = ""

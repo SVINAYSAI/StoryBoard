@@ -35,7 +35,11 @@ export const MENU_ITEMS = [
   { id: 'planner', name: 'Script Planner', desc: 'Storyboard outline builder' },
   { id: 'library', name: 'Voice Library', desc: 'Audition ElevenLabs actors' },
   { id: 'studio', name: 'Voiceover Studio', desc: 'Generate & play audios' },
+  { id: 'audio-enhancer', name: 'Audio Lab', desc: 'Voice isolation & cleanup' },
+  { id: 'music', name: 'Music Studio', desc: 'AI music & sound effects' },
+  { id: 'youtube', name: 'YouTube Import', desc: 'Import your own videos' },
   { id: 'visuals', name: 'Storyboard Visuals', desc: 'Generate images & videos' },
+  { id: 'editor', name: 'Video Editor', desc: 'Timeline & Final Render' },
 ];
 
 export const MENU_ICONS = {
@@ -43,5 +47,9 @@ export const MENU_ICONS = {
   planner: 'FileText',
   library: 'User',
   studio: 'Volume2',
+  'audio-enhancer': 'Wand2',
+  music: 'Music2',
+  youtube: 'Youtube',
   visuals: 'Sparkles',
+  editor: 'Film',
 };

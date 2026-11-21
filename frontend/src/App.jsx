@@ -10,13 +10,20 @@ import ScriptPlanner from './components/planner/ScriptPlanner';
 import VoiceSelector from './components/voices/VoiceSelector';
 import VoiceOverCreator from './components/studio/VoiceOverCreator';
 import StoryboardVisualizer from './components/visuals/StoryboardVisualizer';
+import VideoEditor from './components/editor/VideoEditor';
+import AudioEnhancer from './components/audio/AudioEnhancer';
+import MusicStudio from './components/music/MusicStudio';
+import YoutubeImport from './components/youtube/YoutubeImport';
 
 // Custom hooks
 import useCredits from './hooks/useCredits';
 import useVoices from './hooks/useVoices';
+import useVoiceLibrary from './hooks/useVoiceLibrary';
 import useHistory from './hooks/useHistory';
 import useProjects from './hooks/useProjects';
 import useScriptState from './hooks/useScriptState';
+
+import { api } from './api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('research');
@@ -27,6 +34,17 @@ export default function App() {
   // ── Hooks ─────────────────────────────────────────────────────────────────
   const { credits, isLoadingCredits, fetchCredits } = useCredits();
   const { voices, isLoadingVoices, voicesError, selectedVoice, setSelectedVoice, fetchVoices } = useVoices();
+  const {
+    voices: libraryVoices,
+    filters: libraryFilters,
+    isLoading: libraryIsLoading,
+    error: libraryError,
+    hasMore: libraryHasMore,
+    searchVoices: librarySearch,
+    updateFilter: libraryUpdateFilter,
+    loadMore: libraryLoadMore,
+    resetFilters: libraryReset,
+  } = useVoiceLibrary();
   const { history, isLoadingHistory, fetchHistory, handleDeleteHistoryItem, handleUpdateHistoryWithNewAudio } = useHistory();
   const {
     projectId, setProjectId, projectName, setProjectName,
@@ -47,12 +65,14 @@ export default function App() {
   } = useScriptState();
 
   // ── Build generated audios map ────────────────────────────────────────────
+  // History is newest-first, so the first match wins — this is what lets a
+  // freshly cleaned track supersede the noisy original for the same segment.
   const generatedAudios = {};
   if (history && activeScript?.segments) {
     for (const h of history) {
       for (const seg of activeScript.segments) {
         if (h.text === seg.text) {
-          generatedAudios[seg.id] = h;
+          if (!generatedAudios[seg.id]) generatedAudios[seg.id] = h;
           break;
         }
       }
@@ -90,6 +110,36 @@ export default function App() {
     handleNewProject();
     resetScriptState();
     setSelectedVoice(voices.length > 0 ? voices.find(v => v.name === 'Rachel') || voices[0] : null);
+  };
+
+  // ── Audio Lab → Storyboard segment assignment ─────────────────────────────
+  // Segment audio is derived by matching history text to segment text, so
+  // assigning means stamping the segment's text onto the cleaned track.
+  const handleAssignEnhancedAudioToSegment = async (segmentId, enhancedAudio) => {
+    const segment = scriptSegments.find((s) => String(s.id) === String(segmentId));
+    if (!segment || !enhancedAudio?.filename) return;
+
+    handleUpdateHistoryWithNewAudio({
+      ...enhancedAudio,
+      text: segment.text,
+      char_count: segment.text?.length || 0,
+      segment_id: segmentId,
+      timestamp: Date.now() / 1000,
+    });
+
+    try {
+      const formData = new FormData();
+      formData.append('filename', enhancedAudio.filename);
+      formData.append('segment_id', String(segmentId));
+      formData.append('text', segment.text || '');
+      if (projectId) formData.append('project_id', projectId);
+
+      await api.audioEnhancer.assignSegment(formData);
+      await fetchHistory();
+    } catch (err) {
+      // Keep the optimistic assignment; it just won't survive a reload.
+      console.error('Failed to persist segment assignment:', err);
+    }
   };
 
   // ── Research → Script Topic handler ───────────────────────────────────────
@@ -175,6 +225,15 @@ export default function App() {
                 voices={voices}
                 isLoading={isLoadingVoices}
                 error={voicesError}
+                libraryVoices={libraryVoices}
+                libraryFilters={libraryFilters}
+                libraryIsLoading={libraryIsLoading}
+                libraryError={libraryError}
+                libraryHasMore={libraryHasMore}
+                onLibraryUpdateFilter={libraryUpdateFilter}
+                onLibraryLoadMore={libraryLoadMore}
+                onLibraryReset={libraryReset}
+                onLibrarySearch={librarySearch}
               />
             </div>
           )}
@@ -199,6 +258,31 @@ export default function App() {
             </div>
           )}
 
+          {activeTab === 'audio-enhancer' && (
+            <div className="animate-fade-in">
+              <AudioEnhancer
+                activeScript={activeScript}
+                voices={voices}
+                selectedVoice={selectedVoice}
+                onAssignToSegment={handleAssignEnhancedAudioToSegment}
+                historyAudios={history}
+                projectId={projectId}
+              />
+            </div>
+          )}
+
+          {activeTab === 'music' && (
+            <div className="animate-fade-in">
+              <MusicStudio />
+            </div>
+          )}
+
+          {activeTab === 'youtube' && (
+            <div className="animate-fade-in">
+              <YoutubeImport />
+            </div>
+          )}
+
           {activeTab === 'visuals' && (
             <div className="animate-fade-in">
               <StoryboardVisualizer
@@ -208,6 +292,16 @@ export default function App() {
                 onUpdateSegments={setScriptSegments}
                 onUpdateScriptTopic={setScriptTopic}
                 onTabChange={setActiveTab}
+              />
+            </div>
+          )}
+
+          {activeTab === 'editor' && (
+            <div className="animate-fade-in">
+              <VideoEditor 
+                visualScenes={visualScenes}
+                activeScript={activeScript}
+                history={history}
               />
             </div>
           )}

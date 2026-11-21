@@ -142,7 +142,11 @@ export default function StoryboardVisualizer({
       const response = await fetch('/api/visualize/scene/generate-prompts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scene_text: manualSceneText, mood: manualMood })
+        body: JSON.stringify({ 
+          scene_text: manualSceneText, 
+          mood: manualMood,
+          aspect_ratio: selectedRatio
+        })
       });
       if (!response.ok) {
         const errData = await response.json();
@@ -207,7 +211,11 @@ export default function StoryboardVisualizer({
       const res = await fetch('/api/visualize/image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: scene.master_prompt_image, model: selectedImageModel })
+        body: JSON.stringify({
+          prompt: scene.master_prompt_image,
+          model: selectedImageModel,
+          aspect_ratio: selectedRatio
+        })
       });
       if (!res.ok) {
         const errData = await res.json();
